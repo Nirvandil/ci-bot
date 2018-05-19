@@ -1,0 +1,38 @@
+{
+  "properties": [
+    {
+      "name": "ci.ciBaseUrl",
+      "type": "java.lang.String",
+      "description": "URL к REST API Bamboo сервера, на котором необоходим проверять статус сборки.."
+    },
+    {
+      "name": "ci.devChat",
+      "type": "java.lang.String",
+      "description": "Номер чата телеграм, куда необходимо отправлять уведомления."
+    },
+    {
+      "name": "ci.botToken",
+      "type": "java.lang.String",
+      "description": "Токен бота."
+    },
+    {
+      "name": "ci.appCheckUrl",
+      "type": "java.lang.String",
+      "description": "URL, по доступности которого будет считаться, что приложение запущено."
+    },
+    {
+      "name": "ci.appBaseUrl",
+      "type": "java.lang.String",
+      "description": "Базовый URL приложения (включая contextPath)."
+    },
+    {
+      "name": "ci.ciCredentials",
+      "type": "java.lang.String",
+      "description": "Base64 encoded login:password пользователя Bamboo для доступа к REST API."
+    },
+    {
+      "name": "context.initializer.classes",
+      "type": "java.lang.String",
+      "description": "Классы, дополнительно инициализирующие контекст."
+    }
+  ] }
