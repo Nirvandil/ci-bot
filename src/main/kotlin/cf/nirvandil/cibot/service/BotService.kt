@@ -27,7 +27,7 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
 
     @Scheduled(fixedDelay = THIRTY_SECONDS)
     fun processDescribes() {
-        log.info("Start scheduled processing.")
+        log.debug("Start scheduled processing.")
         val taskNumber = queue.poll()
         if (taskNumber != null) {
             log.info("Found task number {} for explain. Sleeping for 10 seconds to take time for Bamboo.", taskNumber)
