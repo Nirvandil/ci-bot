@@ -5,8 +5,10 @@ import cf.nirvandil.cibot.model.BuildResult
 import cf.nirvandil.cibot.props.CiProperties
 import me.ivmg.telegram.Bot
 import me.ivmg.telegram.entities.ChatAction
+import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import java.util.concurrent.ArrayBlockingQueue
@@ -30,8 +32,8 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
         log.debug("Start scheduled processing.")
         val taskNumber = queue.poll()
         if (taskNumber != null) {
-            log.info("Found task number {} for explain. Sleeping for 10 seconds to take time for Bamboo.", taskNumber)
-            Thread.sleep(TEN_SECONDS)
+            log.info("Found task number {} for explain. Sleeping for 30 seconds to take time for Bamboo.", taskNumber)
+            Thread.sleep(THIRTY_SECONDS)
             log.info("Start checking and sending message.")
             bot.sendChatAction(devChat, ChatAction.TYPING)
             bambooClient.get().uri("/latest/result/EGIP-BACK/$taskNumber?expand=changes.change.files&os_authType=basic")
@@ -48,7 +50,10 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
     }
 
     private fun describeFail(err: Throwable) {
-        bot.sendToDevChat("⛔ Похоже, запуск проекта завершился неудачно: \n $err")
+        if (err is WebClientResponseException && err.statusCode == FORBIDDEN)
+            bot.sendToDevChat("Приложение находится в запущенном состоянии. ✅")
+        else
+            bot.sendToDevChat("⛔ Похоже, запуск проекта завершился неудачно: \n $err")
     }
 
     private fun <T> Bot.sendToDevChat(message: T) {

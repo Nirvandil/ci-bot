@@ -13,7 +13,8 @@ data class BuildResult(private val buildNumber: Int, private val successful: Boo
                     }
                 }
             }
-        } else "К сожалению, сборка номер $buildNumber завершилась неудачно. ⛔️"
+        } else "К сожалению, сборка номер $buildNumber завершилась неудачно. ⛔️\n" +
+                "Подробности можно найти на странице ${System.getenv("CI_BASE_URL")}/browse/EGIP-BACK-$buildNumber/log."
     }
 }
 

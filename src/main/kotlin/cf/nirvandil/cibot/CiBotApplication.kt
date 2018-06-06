@@ -58,7 +58,7 @@ fun beans() = beans {
     bean("Bamboo") {
         val props = ref<CiProperties>()
         WebClient.builder()
-                .baseUrl(props.ciBaseUrl)
+                .baseUrl("${props.ciBaseUrl}/rest/api")
                 .defaultHeader(AUTHORIZATION, "Basic ${props.ciCredentials}")
                 .defaultHeader(ACCEPT, APPLICATION_JSON_UTF8_VALUE)
                 .build()

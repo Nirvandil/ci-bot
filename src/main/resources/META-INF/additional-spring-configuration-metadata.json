@@ -3,7 +3,7 @@
     {
       "name": "ci.ciBaseUrl",
       "type": "java.lang.String",
-      "description": "URL к REST API Bamboo сервера, на котором необоходим проверять статус сборки.."
+      "description": "URL Bamboo сервера, на котором необоходим проверять статус сборки."
     },
     {
       "name": "ci.devChat",
