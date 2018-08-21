@@ -32,8 +32,8 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
         log.debug("Start scheduled processing.")
         val taskNumber = queue.poll()
         if (taskNumber != null) {
-            log.info("Found task number {} for explain. Sleeping for 30 seconds to take time for Bamboo.", taskNumber)
-            Thread.sleep(THIRTY_SECONDS)
+            log.info("Found task number {} for explain. Sleeping for 1 minute to take time for Bamboo.", taskNumber)
+            Thread.sleep(ONE_MINUTE)
             log.info("Start checking and sending message.")
             bot.sendChatAction(devChat, ChatAction.TYPING)
             bambooClient.get().uri("/latest/result/EGIP-BACK/$taskNumber?expand=changes.change.files&os_authType=basic")
@@ -73,5 +73,6 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
     companion object {
         private const val TEN_SECONDS = 10_000L
         private const val THIRTY_SECONDS = 3 * TEN_SECONDS
+        private const val ONE_MINUTE = 2 * THIRTY_SECONDS
     }
 }

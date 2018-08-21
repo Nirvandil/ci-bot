@@ -1,14 +1,14 @@
 package cf.nirvandil.cibot
 
-import cf.nirvandil.cibot.service.BotService
 import cf.nirvandil.cibot.props.CiProperties
+import cf.nirvandil.cibot.service.BotService
 import me.ivmg.telegram.bot
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
-import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.support.GenericApplicationContext
 import org.springframework.context.support.beans
 import org.springframework.http.HttpHeaders.ACCEPT
@@ -23,12 +23,19 @@ import org.springframework.web.reactive.function.server.router
 @EnableScheduling
 @SpringBootApplication
 @EnableConfigurationProperties
-class CiBotApplication
+class CiBotApplication {
+    @Autowired
+    fun initializeContext(ctx: GenericApplicationContext) {
+        beans().initialize(ctx)
+    }
+}
 
 val log: Logger = LoggerFactory.getLogger("CIGostGroup")
 
 fun main(args: Array<String>) {
-    runApplication<CiBotApplication>(*args)
+    runApplication<CiBotApplication>(*args) {
+        addInitializers(beans())
+    }
 }
 
 fun beans() = beans {
@@ -73,8 +80,4 @@ fun beans() = beans {
 
     bean { BotService(ref("Bamboo"), ref("AppClient"), ref(), ref()) }
     bean<CiProperties>()
-}
-
-class BeansInitializer : ApplicationContextInitializer<GenericApplicationContext> {
-    override fun initialize(context: GenericApplicationContext) = beans().initialize(context)
 }
