@@ -2,6 +2,8 @@ package cf.nirvandil.cibot.service
 
 import cf.nirvandil.cibot.log
 import cf.nirvandil.cibot.model.BuildResult
+import cf.nirvandil.cibot.model.BuildType
+import cf.nirvandil.cibot.model.Description
 import cf.nirvandil.cibot.props.CiProperties
 import me.ivmg.telegram.Bot
 import me.ivmg.telegram.entities.ChatAction
@@ -16,10 +18,10 @@ import java.util.concurrent.ArrayBlockingQueue
 class BotService(private val bambooClient: WebClient, private val appClient: WebClient,
                  private val bot: Bot, private val props: CiProperties) {
 
-    private val queue = ArrayBlockingQueue<Long>(42)
+    private val queue = ArrayBlockingQueue<Description>(42)
     private val devChat: Long = props.devChat.toLong()
 
-    fun addToQueue(item: Mono<Long>) {
+    fun addToQueue(item: Mono<Description>) {
         item.subscribe { queue.add(it) }
     }
 
@@ -30,20 +32,23 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
     @Scheduled(fixedDelay = THIRTY_SECONDS)
     fun processDescribes() {
         log.debug("Start scheduled processing.")
-        val taskNumber = queue.poll()
-        if (taskNumber != null) {
-            log.info("Found task number {} for explain. Sleeping for 1 minute to take time for Bamboo.", taskNumber)
+        val description = queue.poll()
+        if (description != null) {
+            log.info("Found task number {} with type {} for explain. Sleeping for 1 minute to take time for Bamboo.", description.buildNumber, description.buildType)
             Thread.sleep(ONE_MINUTE)
             log.info("Start checking and sending message.")
             bot.sendChatAction(devChat, ChatAction.TYPING)
-            bambooClient.get().uri("/latest/result/EGIP-BACK/$taskNumber?expand=changes.change.files&os_authType=basic")
+            bambooClient.get().uri("/latest/result/${description.buildType.toProject()}/${description.buildNumber}?expand=changes.change.files&os_authType=basic")
                     .retrieve().bodyToMono<BuildResult>()
                     .doOnNext { bot.sendToDevChat(it) }
                     .doOnError { bot.sendToDevChat("⛔ Не удалось проверить статус сборки:\n $it") }
-                    .then(appClient.get().uri(props.appCheckUrl)
-                            .retrieve().bodyToMono<String>()
-                            .doOnNext(this::parseCheck)
-                            .doOnError(this::describeFail)
+                    .then(
+                            if (description.buildType == BuildType.BACKEND) {
+                                appClient.get().uri(props.appCheckUrl)
+                                        .retrieve().bodyToMono<String>()
+                                        .doOnNext(this::parseCheck)
+                                        .doOnError(this::describeFail)
+                            } else Mono.empty()
                     )
                     .subscribe()
         }

@@ -21,3 +21,11 @@ data class BuildResult(private val buildNumber: Int, private val successful: Boo
 data class Changes(val change: List<Change>)
 
 data class Change(val comment: String, val commitUrl: String, val author: String)
+
+data class Description(val buildNumber: Int, val buildType: BuildType)
+
+enum class BuildType {
+    BACKEND, FRONTEND;
+
+    fun toProject(): String =  if (this == BACKEND) "EGIP-BACK" else "EGIP-FRONT"
+}

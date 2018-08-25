@@ -1,5 +1,7 @@
 package cf.nirvandil.cibot
 
+import cf.nirvandil.cibot.model.BuildType
+import cf.nirvandil.cibot.model.Description
 import cf.nirvandil.cibot.props.CiProperties
 import cf.nirvandil.cibot.service.BotService
 import me.ivmg.telegram.bot
@@ -19,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.bodyToMono
 import org.springframework.web.reactive.function.server.router
+import reactor.core.publisher.Mono
 
 @EnableScheduling
 @SpringBootApplication
@@ -54,8 +57,9 @@ fun beans() = beans {
                     botService.sendMessage(it.bodyToMono())
                     ok().build()
                 }
-                POST("/explain") {
-                    botService.addToQueue(it.bodyToMono())
+                POST("/explain/{buildNumber}/{buildType}") {
+                    val description = Description(it.pathVariable("buildNumber").toInt(), BuildType.valueOf(it.pathVariable("buildType")))
+                    botService.addToQueue(Mono.just(description))
                     ok().build()
                 }
             }
