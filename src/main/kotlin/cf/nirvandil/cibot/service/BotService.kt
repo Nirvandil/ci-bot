@@ -42,15 +42,15 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
                     .retrieve().bodyToMono<BuildResult>()
                     .doOnNext { bot.sendToDevChat(it) }
                     .doOnError { bot.sendToDevChat("⛔ Не удалось проверить статус сборки:\n $it") }
-                    .then(
-                            if (description.buildType == BuildType.BACKEND) {
-                                appClient.get().uri(props.appCheckUrl)
-                                        .retrieve().bodyToMono<String>()
-                                        .doOnNext(this::parseCheck)
-                                        .doOnError(this::describeFail)
-                            } else Mono.empty()
-                    )
                     .subscribe()
+            if (description.buildType == BuildType.BACKEND) {
+                Thread.sleep(30_000) // wait for app run
+                appClient.get().uri(props.appCheckUrl)
+                        .retrieve().bodyToMono<String>()
+                        .doOnNext(this::parseCheck)
+                        .doOnError(this::describeFail)
+                        .subscribe()
+            }
         }
     }
 
