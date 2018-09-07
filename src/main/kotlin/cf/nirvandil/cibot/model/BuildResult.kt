@@ -1,7 +1,10 @@
 package cf.nirvandil.cibot.model
 
 data class BuildResult(private val buildNumber: Int, private val successful: Boolean, private val changes: Changes) {
+    var buildType: BuildType = BuildType.BACKEND
+
     override fun toString(): String {
+        val project = buildType.toProject()
         return if (successful) {
             buildString {
                 append("Сборка номер $buildNumber завершилась успешно. ✅ \n")
@@ -14,7 +17,7 @@ data class BuildResult(private val buildNumber: Int, private val successful: Boo
                 }
             }
         } else "К сожалению, сборка номер $buildNumber завершилась неудачно. ⛔️\n" +
-                "Подробности можно найти на странице ${System.getenv("CI_BASE_URL")}/browse/EGIP-BACK-$buildNumber/log."
+                "Подробности можно найти на странице ${System.getenv("CI_BASE_URL")}/browse/$project-$buildNumber/log."
     }
 }
 
@@ -26,6 +29,5 @@ data class Description(val buildNumber: Int, val buildType: BuildType)
 
 enum class BuildType {
     BACKEND, FRONTEND;
-
     fun toProject(): String =  if (this == BACKEND) "EGIP-BACK" else "EGIP-FRONT"
 }

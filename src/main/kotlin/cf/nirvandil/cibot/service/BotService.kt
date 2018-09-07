@@ -40,11 +40,14 @@ class BotService(private val bambooClient: WebClient, private val appClient: Web
             bot.sendChatAction(devChat, ChatAction.TYPING)
             bambooClient.get().uri("/latest/result/${description.buildType.toProject()}/${description.buildNumber}?expand=changes.change.files&os_authType=basic")
                     .retrieve().bodyToMono<BuildResult>()
-                    .doOnNext { bot.sendToDevChat(it) }
+                    .doOnNext {
+                        it.buildType = description.buildType
+                        bot.sendToDevChat(it)
+                    }
                     .doOnError { bot.sendToDevChat("⛔ Не удалось проверить статус сборки:\n $it") }
                     .subscribe()
             if (description.buildType == BuildType.BACKEND) {
-                Thread.sleep(30_000) // wait for app run
+                Thread.sleep(THIRTY_SECONDS) // wait for app run
                 appClient.get().uri(props.appCheckUrl)
                         .retrieve().bodyToMono<String>()
                         .doOnNext(this::parseCheck)
